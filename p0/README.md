@@ -13,7 +13,7 @@
 This project will cover the basics of working in a Unix environment,
 a small introduction to Python,
 and the basics of working with the autograding tools you will be using all quarter.
-In this course, we will only be using **Python 3** (>= 3.8).
+In this course, we will only be using **Python 3** (>= 3.10).
 
 In this course, you may use whatever machine you choose:
 your own computer, the [SOE servers](https://support.soe.ucsc.edu/linux-servers),
@@ -186,7 +186,10 @@ but TAs will not be able to assist you with any environment or package issues.
 
 #### Tk
 
-To run any Pac-Man code that uses visuals, you will need to install a library called [Tk](https://tkdocs.com/tutorial/install.html).
+*Optional*
+
+If you want to run any Pac-Man code in a system window (instead of a browser window),
+then you will need to install a library called [Tk](https://tkdocs.com/tutorial/install.html).
 There is a version for pretty much all operating system,
 and you should be able to follow the simple [installation instructions](https://tkdocs.com/tutorial/install.html).
 
@@ -198,6 +201,8 @@ python3 -c 'import tkinter ; tkinter._test()'
 ```
 
 If a window pops up, then you should be all set!
+
+You can now run Pac-Man commands with `--ui tk` to use a Tk window instead of a browser window.
 
 ### Submission
 
@@ -512,16 +517,15 @@ Found 2 submissions.
 ## Part 3: Playing Pac-Man
 
 To finish up this assignment,
-let's plat a game of Pac-Man!
+let's play a game of Pac-Man!
 You will be working with the same Pac-Man repo for the rest of the assignments in this course,
 so let's get used to working with it now.
 
 First, make sure that you are in your [virtual environment](#virtual-environments),
-and have installed the [requirements for this course](#required-packages)
-([including Tk](#tk)).
+and have installed the [requirements for this course](#required-packages).
 
 Now get the Pac-Man repo we will use in this course:
-[github.com/linqs/pacman](https://github.com/linqs/pacman).
+[github.com/edulinq/pacai](https://github.com/edulinq/pacai).
 Note that this is a "template repository" on GitHub,
 so you can use "Use this template" button on the repo's page to create your own **PRIVATE** copy of this repo.
 It is critical that you make your repository **PRIVATE**,
@@ -535,7 +539,7 @@ clone it and move into in.
 To start a game of Pac-Man that you can control with the arrow keys,
 all you need to do is run:
 ```sh
-python3 -m pacai.bin.pacman
+python3 -m pacai.pacman
 ```
 
 Once you can run a game of Pac-Man,

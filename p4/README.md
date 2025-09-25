@@ -1,7 +1,7 @@
-# Project 4: Pacman Capture the Flag
+# Project 4: Pac-Man Capture the Flag
 
 <p align="center">
-    <img alt="Pacman with Ghosts" src="images/capture1.gif" width="800px">
+    <img alt="Pac-Man with Ghosts" src="images/capture-default.webp" width="800px">
     </br>
     Enough of defense,</br>
     Onto enemy terrain.</br>
@@ -10,29 +10,37 @@
 
 ## Introduction
 
-The final project involves a multi-player capture-the-flag variant of Pacman,
-where agents control both Pacman and ghosts in coordinated team-based strategies.
+The final project involves a multi-player capture-the-flag variant of Pac-Man,
+where agents control both Pac-Man and ghosts in coordinated team-based strategies.
 Your team will try to eat the food on the far side of the map, while defending the food on your home side.
 
 The project will consist of three phases:
 
 1. The first phase will consist of forming a team (3 to 4 people) and an initial test of the tournament.
-   Students must have a team and at **minimum** must submit a
-   [DummyAgent](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/dummy.html#pacai.agents.capture.dummy.DummyAgent) for this phase.
+   Students must submit a functioning team of agents.
+   For this phase we only evaluate that your team runs and do not care about how well it performs.
+   (So for this phase, you can just submit a team full of
+   [DummyAgents](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/dummy.html#DummyAgent) that just sits there.)
+   When you submit your team to the autograder, it will run basic checks on your team.
+   Full points from the autograder means that your team passes all the basic checks.
+   For this phase, your agent needs to run, but does not need to get full points from the autograder.
 2. The second phase will consist of daily round-robin style tournaments.
-   During this phase students should improve their agents, while looking for weaknesses in their opponents' submissions. Only teams with agents that are getting full points from the autograder will participate in the tournament.
-3. The final phase will be a round-robin style tournament, in which students show their best. Your agent's performance in this last tournament will determine your grade.
+   During this phase students should improve their agents, while looking for weaknesses in their opponents' submissions.
+   Only teams with agents that are getting full points from the autograder will participate in the tournament.
+3. The final phase will be a round-robin style tournament, in which students show their best.
+   Your agent's performance in this last tournament will affect your grade.
    This is students' final chance to shine, winner takes all!
 
 All of the deadlines for these events will exist on **Canvas**.
 Make sure you check early, **do not** miss a deadline!
 
-We will evaluate your submissions based on a short written report (2-3 pages) on your modeling of the problem and agent design, as well as your performance against the baseline agent, the staff agents, and your classmates in tournament play.
+We will evaluate your submissions based on a short written report (2-3 pages) that should detail your modeling of the problem and agent design,
+as well as your performance against the baseline agent, the staff agents, and your classmates in tournament play.
 
 ### Submission
 
 To enter into the nightly tournaments, your team's agents and all relevant functions must be defined in
-[pacai.student.myTeam](https://linqs.github.io/pacman/docs/latest/pacai/student/myTeam.html).
+[pacai.student.capture.py](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/capture.py).
 
 Every team must have a unique name,
 consisting only of ASCII letters and digits (any other characters, including whitespace, will be ignored).
@@ -41,17 +49,17 @@ Instructions for forming groups (using Google Forms) will be posted on Canvas in
 You must submit your team info (team name, motto and list of members).
 
 In every submission to the autograder (linked below),
-you must include a file `name.txt` in which you will write only your unique team name.
+you must include a file [capture-team.txt](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/capture-team.txt) in which you will write only your unique team name.
 **Do not** include other extraneous text in this file.
 Only your team name will be displayed to the rest of the class.
-You will fill in portions of `pacai/student/myTeam.py` during this assignment.
+You will fill in portions of `pacai/student/capture.py` during this assignment.
 You should **only** submit these two files.
 
 For instructions on submission,
 refer back to the [P0 README](../p0/README.md).
 for example, you may submit with the command:
 ```sh
-python3 -m autograder.run.submit pacai/student/myTeam.py pacai/student/name.txt
+python3 -m autograder.run.submit pacai/student/capture.py pacai/student/capture-team.txt
 ```
 
 The most recent submission of any team member before the tournament begins will become the whole team's agent and will represent your team in the tournament.
@@ -67,36 +75,38 @@ The remaining 20 points will be awarded based on your agent's performance in the
 
 The written report should be 2-3 pages **(no more)**.
 Through this report we expect you to demonstrate your ability to constructively solve AI problems by identifying:
-- The fundamental problems you are trying to solve.
-- How you modeled these problems.
-- The computational strategy used to solve each problem.
-- Algorithmic choices you made in your implementation.
-- Any obstacles you encountered while solving the problem.
-- Evaluation of your agent.
-- Lessons learned during the project.
+ - The fundamental problems you are trying to solve.
+ - How you modeled these problems.
+ - The computational strategy used to solve each problem.
+ - Algorithmic choices you made in your implementation.
+ - Any obstacles you encountered while solving the problem.
+ - Evaluation of your agent.
+ - Lessons learned during the project.
+
+<!-- TODO(Batu, Niloofar): Review the grading scheme. -->
+## Points & Teams
 
 A portion of your grade will be based on performance against the following staff agents:
-- _baseline
-- _baseline_2
-- _staff_SlugTrap
-- _staff_SomeSlug
-- _staff_SlugBrain
-- _teamTA_w17
-- _staff_ta_22
-- _staff_trappingAgent
-
+ - `_baseline`
+ - `_baseline_2`
+ - `_staff_SlugTrap`
+ - `_staff_SomeSlug`
+ - `_staff_SlugBrain`
+ - `_teamTA_w17`
+ - `_staff_ta_22`
+ - `_staff_trappingAgent`
 
 Points are also awarded as follows:
-- If you lose to the dummy agent, zero points will be awarded for this section.
-- 10 points for beating the _baseline agent.
-- +5 points for beating one additional staff agent.
-- +5 points for beating 2 staff agents (in addition to _baseline), OR.
-  - +1 points for being in the top 50%.
-  - +2 points for being in the top 40%.
-  - +3 points for being in the top 30%.
-  - +4 points for being in the top 20%.
-  - +5 points for being in the top 10%.
-- +1 Extra Credit point for being the number one team.
+ - If you lose to the dummy agent, zero points will be awarded for this section.
+ - 10 points for beating the `_baseline agent`.
+ - +5 points for beating one additional staff agent.
+ - +5 points for beating 2 staff agents (in addition to `_baseline`), OR.
+   - +1 points for being in the top 50%.
+   - +2 points for being in the top 40%.
+   - +3 points for being in the top 30%.
+   - +4 points for being in the top 20%.
+   - +5 points for being in the top 10%.
+ - +1 Extra Credit point for being the number one team.
 
 <!-- How we compute the percentiles based on the ranking of the teams is described below in [Contest Details](#contest-details). -->
 
@@ -119,84 +129,122 @@ If you can't make our office hours, let us know and we will schedule more.
 We want these projects to be rewarding and instructional, not frustrating and demoralizing.
 One more piece of advice: if you don't know what a variable does or what kind of values it takes, print it out.
 
-## Pacman Capture the Flag
+## Pac-Man Capture the Flag
 
-### Layout
+Your peaceful (and sometimes spooky) Pac-Man board is now a battlefield:
+red vs blue!
+In capture, there are two teams of agents: red (on the left) and blue (on the right).
+The goal is to eat all the food on your opponent's side of the map.
+When an agent is on their own side of the map, they will be a ghost with the ability to eat invaders.
+When an agent in on their opponent's side of the map, they will be a Pac-Man that can eat their opponent's food.
 
-The Pacman map is now divided into two halves: red (left) and blue (right).
-Red agents (which all have even indices) must defend the red food while trying to eat the blue food.
-When on the red side, a red agent is a ghost.
-When crossing into enemy territory, the agent becomes a Pacman.
+You can try out a game of capture with dummy agents using:
+```sh
+python3 -m pacai.capture --agent-arg 0::name=agent-user-input
+```
 
-By default, games are run on the `defaultcapture` layout.
-To test your agent on other layouts, use the `--layout` option.
-In particular, you can generate random layouts by specifying `RANDOM[seed]`.
-For example, `--layout RANDOM140` will use a map randomly generated with seed 140.
+Just like in Pac-Man, a wealth of options are available to you:
+```sh
+python3 -m pacai.capture --help
+```
+
+### Board
+
+As with Pac-Man, there are several capture boards to choose from:
+ - `capture-alley`
+ - `capture-blox`
+ - `capture-crowded`
+ - `capture-default`
+ - `capture-distant`
+ - `capture-fast`
+ - `capture-jumbo`
+ - `capture-medium` (default)
+ - `capture-office`
+ - `capture-strategic`
+ - `capture-test`
+ - `capture-tiny`
+
+In addition, you can also use `random` to construct a random capture board:
+```sh
+python3 -m pacai.capture --agent-arg 0::name=agent-user-input --board random
+```
+
+If you do this a few times, you will likely see a wide variety in the types of boards that can be generated.
+You can choose a specific random seed (and therefore board) by appending a dash and int to `random`.
+For example:
+```sh
+python3 -m pacai.capture --agent-arg 0::name=agent-user-input --board random-6
+```
+
+Tournament games will be played on the following boards:
+
+| Board             | Number of Games |
+|-------------------|-----------------|
+| `capture-default` | 5               |
+| `random`          | 6               |
 
 ### Scoring
 
-When a Pacman eats a food dot, the food is permanently removed and one point is scored for that Pac-Man's team.
-Red team scores are positive, while Blue team scores are negative.
+When a Pac-Man eats a food dot, the food is permanently removed and one point is scored for that Pac-Man's team.
+Red team scores are negative, while Blue team scores are positive.
+Here are the point values associated with different actions.
 
-### Eating Pacman
+| Action                 | Points | Notes |
+|------------------------|--------|-------|
+| Nothing                | 0      | Unlike classic Pac-Man, there is no continual point loss. |
+| Eating a Food Pellet   | 10     | The game ends when all of a team's food is eaten. |
+| Eating a Power Capsule | 0      | Opponents will now be scared for a set duration (but only when ghosts). |
+| Eating a Pac-Man       | 0      | The invader will respawn back at their starting location on their next turn. |
+| Eating a Ghost         | 0      | The defender will respawn back at their starting location on their next turn and is no longer scared. |
+| Game End               | 0      | No additional points are given for winning/losing (ending the game). |
 
-When a Pacman is eaten by an opposing ghost, the Pacman returns to its starting position (as a ghost).
-No points are awarded for eating an opponent.
+### Limitations
 
-### Power capsules
+There are several limitations imposed on capture games.
+Encountering any of these actions will cause a game to stop,
+and may result in a team forfeiting the game.
+The actions and their outcomes are listed below.
 
-If Pacman eats a power capsule, agents on the opposing team become "scared" for the next 40 moves,
-or until they are eaten and respawn, whichever comes sooner.
-Agents that are "scared" are susceptible while in the form of ghosts (i.e. while on their own team's side) to being eaten by Pacman.
-Specifically, if Pacman collides with a "scared" ghost,
-Pacman is unaffected and the ghost respawns at its starting position (no longer in the "scared" state).
-
-### Winning
-
-A game ends when one team eats all but two of the opponents' dots.
-Games are also limited to 1200 agent moves (300 moves per each of the four agents).
-If this move limit is reached, whichever team has eaten the most food wins.
-If the score is zero (i.e., tied) this is recorded as a tie game.
-
-### Computation Time
-
-We will run your submissions on a VM server.
-Each move which does not return within one second will incur a warning.
-After three warnings, or any single move taking more than three seconds, the agent responsible automatically forfeits.
-There will be an initial start-up allowance of 15 seconds
-(use the [pacai.agents.capture.capture.CaptureAgent.registerInitialState](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.registerInitialState) function).
-If you agent times out or otherwise throws an exception,
-an error message will be present in the log files, which you can download from the results page (see below).
+| Action | Count | Outcome |
+|----------------------------------------|------------|---------|
+| Combined Agent Actions                 | 1200 Moves | The game ends and is scored normally. |
+| Single Agent Starting Computation Time | 15 Seconds | The team with the offending agent loses. |
+| Single Agent Action Computation Time   | 3 Seconds  | The team with the offending agent loses. |
+| Total Game Time                        | 60 Seconds | The game ends in a tie. |
 
 ## Getting Started
 
-By default, you can run a game with the simple
-[pacai.core.baselineTeam](https://linqs.github.io/pacman/docs/latest/pacai/core/baselineTeam.html) that the staff has provided:
+You can set specific Capture teams for red/blue with the respective `--red` and `--blue` flags.
+For example, you can make red use the provided random team with:
 ```sh
-python3 -m pacai.bin.capture
+python3 -m pacai.capture --red capture-team-random
 ```
 
-A wealth of options are available to you:
+A [simple, baseline team](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/team.html#create_team_baseline) has been provided for you.
+This team represents the minimum bar that your team should eventually end up beating 99% of the time.
+Watch this team crush the random team:
 ```sh
-python3 -m pacai.bin.capture --help
+python3 -m pacai.capture --red capture-team-random --blue capture-team-baseline --fps 30
 ```
 
-There are four slots for agents, where agents 0 and 2 are always on the red team, and agents 1 and 3 are on the blue team.
-See the section on designing agents for a description of the agents invoked above.
-The only team that we provide is the [baselineTeam](https://linqs.github.io/pacman/docs/latest/pacai/core/baselineTeam.html).
-It is chosen by default as both the red and blue team, but as an example of how to choose teams:
+Note how the [baseline team](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/team.html#create_team_baseline) splits its agents into defensive and offensive agents.
+You are not obligated to make your own agent anything similar to the baseline agent,
+but you will probably see that thinking about both offense and defense will generally serve you well.
+
+Your student team (created by [pacai.student.capture.create_team()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/capture.html#create_team)) has the alias `capture-team-student`.
+So, you can play the baseline team on your own using:
 ```sh
-python3 -m pacai.bin.capture --red pacai.core.baselineTeam --blue pacai.core.baselineTeam
+python3 -m pacai.capture --red capture-team-student --blue capture-team-baseline --fps 30
 ```
 
-which specifies that the red team `--red` and the blue team `--blue` are both created from
-[baselineTeam](https://linqs.github.io/pacman/docs/latest/pacai/core/baselineTeam.html).
-To control one of the four agents with the keyboard, pass the appropriate option:
+Just like Pac-Man, you can play multiple games more quickly by disabling the GUI:
 ```sh
-python3 -m pacai.bin.capture --keys0
+python3 -m pacai.capture --red capture-team-student --blue capture-team-baseline --ui null --num-games 10
 ```
 
-The arrow keys control your character, which will change from ghost to Pacman when crossing the center line.
+When creating your agent,
+make sure to thoroughly examine the Capture game state class ([pacai.capture.gamestate.GameState](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState)).
+There are many function that you may find useful.
 
 ### Official Tournaments
 
@@ -207,27 +255,27 @@ Tournaments are run every night (refer to Canvas for nightly cut off) and includ
 (either earlier in the day or on a previous day) as of the start of the tournament.
 Currently, each team plays every other team 11 times in one match.
 
-The layouts used in the tournament will be drawn from both the default layout (5 games),
-as well as randomly generated layouts (6 games).
-All layouts are symmetric, and the team that moves first is randomly chosen.
+The boards used in the tournament will be drawn from both the default board (5 games),
+as well as randomly generated boards (6 games).
+All boards are symmetric, and the team that moves first is randomly chosen.
 The results for a nightly tournaments can be found [here](http://seacliff.soe.ucsc.edu/cse140-w25/tournaments/), where you can view overall rankings and scores for each match.
-You can also download replays, the layouts used, and the stdout / stderr logs for each agent.
+You can also download replays, the boards used, and the stdout / stderr logs for each agent.
 
 ## Designing Agents
 
 Unlike the other projects,
-an agent now has the more complex job of trading off offense versus defense and effectively functioning as both a ghost and a Pacman in a team setting.
+an agent now has the more complex job of trading off offense versus defense and effectively functioning as both a ghost and a Pac-Man in a team setting.
 Furthermore, the limited information provided to your agent will likely necessitate some probabilistic tracking.
 Finally, the added time limit of computation introduces new challenges.
 
 ### Baseline Team
 
-To kickstart your agent design, we have provided you with a team of two baseline agents,
-defined in [pacai.core.baselineTeam](https://linqs.github.io/pacman/docs/latest/pacai/core/baselineTeam.html).
-They are both quite bad.
-The [pacai.agents.capture.offense.OffensiveReflexAgent](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/offense.html#pacai.agents.capture.offense.OffensiveReflexAgent)
+To kick-start your agent design, we have provided you with a team of baseline agents,
+defined in [pacai.capture.team.create_team_baseline](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/team.html#create_team_baseline).
+They are both quite bad, but get the job dome.
+The [pacai.capture.agents.OffensiveAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/agents.html#OffensiveAgent)
 moves toward the closest food on the opposing side.
-The [pacai.agents.capture.defense.DefensiveReflexAgent](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/defense.html#pacai.agents.capture.defense.DefensiveReflexAgent)
+The [pacai.capture.agents.DefensiveAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/agents.html#DefensiveAgent)
 wanders around on its own side and tries to chase down invaders it happens to see.
 
 ### File naming
@@ -235,42 +283,33 @@ wanders around on its own side and tries to chase down invaders it happens to se
 For the purpose of testing or running games locally,
 you can define a team of agents in any arbitrarily-named python file.
 When submitting to the nightly tournament, however,
-you must define your agents in [pacai.student.myTeam](https://linqs.github.io/pacman/docs/latest/pacai/student/myTeam.html)
-(and you must also create a `name.txt` file that specifies your team name).
-
-### Interface
-
-The [pacai.bin.capture.CaptureGameState](https://linqs.github.io/pacman/docs/latest/pacai/bin/capture.html#pacai.bin.capture.CaptureGameState) should look familiar,
-but contains new methods like [getRedFood](https://linqs.github.io/pacman/docs/latest/pacai/bin/capture.html#pacai.bin.capture.CaptureGameState.getRedFood),
-which gets a grid of food on the red side (note that the grid is the size of the board,
-but is only true for cells on the red side with food).
-Also, note that you can list a team's indices with [getRedTeamIndices](https://linqs.github.io/pacman/docs/latest/pacai/bin/capture.html#pacai.bin.capture.CaptureGameState.getRedTeamIndices),
-or test membership with [isOnRedTeam](https://linqs.github.io/pacman/docs/latest/pacai/bin/capture.html#pacai.bin.capture.CaptureGameState.isOnRedTeam).
+you must define your agents in [pacai.student.capture.py](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/capture.py)
+(and you must also create a [capture-team.txt](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/capture-team.txt) file that specifies your team name).
 
 ### Distance Calculation
 
-To facilitate agent development,
-we provide code in [pacai.core.distanceCalculator](https://linqs.github.io/pacman/docs/latest/pacai/core/distanceCalculator.html#pacai.core.distanceCalculator.DistanceCalculator) to supply shortest path maze distances.
+If you need to calculate distance in your agent,
+we recommend looking into how the baseline agents do it.
 
-### Useful Methods
+### Useful Functions
 
-To get started designing your own agent,
-we recommend subclassing the [pacai.agents.capture.capture.CaptureAgent](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent) class.
-This provides access to several convenience methods.
-Some of these useful methods are:
+Below are some code points that you may find useful.
 
-- [getFood](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getFood)
-- [getFoodYouAreDefending](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getFoodYouAreDefending)
-- [getOpponents](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getOpponents)
-- [getTeam](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getTeam)
-- [getScore](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getScore)
-- [getMazeDistance](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getMazeDistance)
-- [getPreviousObservation](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getPreviousObservation)
-- [getCurrentObservation](https://linqs.github.io/pacman/docs/latest/pacai/agents/capture/capture.html#pacai.agents.capture.capture.CaptureAgent.getCurrentObservation)
+ - [pacai.capture.gamestate.GameState.get_normalized_score](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.get_normalized_score)
+ - [pacai.capture.gamestate.GameState.is_ghost](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.is_ghost)
+ - [pacai.capture.gamestate.GameState.is_pacman](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.is_pacman)
+ - [pacai.capture.gamestate.GameState.is_scared](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.is_scared)
+ - [pacai.capture.gamestate.GameState.food_count](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.food_count)
+ - [pacai.capture.gamestate.GameState.get_food](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.get_food)
+ - [pacai.capture.gamestate.GameState.get_team_positions](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.get_team_positions)
+ - [pacai.capture.gamestate.GameState.get_opponent_positions](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.get_opponent_positions)
+ - [pacai.capture.gamestate.GameState.get_invader_positions](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/capture/gamestate.html#GameState.get_invader_positions)
+ - [pacai.search.distance.DistancePreComputer](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/search/distance.html#DistancePreComputer)
 
 ### Restrictions
 
-The use of qualified imports is not allowed. If you submit a file with qualified imports, the autograder will heavily penalize your score.
+The use of qualified imports is not allowed.
+If you submit a file with qualified imports, the autograder will heavily penalize your score.
 
 You are free to design any agent you want.
 However, you will need to respect the provided APIs if you want to participate in the tournaments.
@@ -301,10 +340,11 @@ Placement is determined by the number of wins
 
 Winners in the mid-project checkpoint contest will receive points as follows:
 3 points for 1st place, 2 points for 2nd place, and 1 point for third place.
+-->
 
 <p align="center">
-    <img alt="Capture with Random Board" src="images/capture2.gif" width="800px">
+    <img alt="Capture with Random Board" src="images/capture-random-7.webp" width="800px">
     </br>
     Have fun!</br>
     Please bring our attention to any problems you discover.
-</p> -->
+</p>

@@ -17,7 +17,7 @@ You can start learning with some of the [materials listed here](p0/README.md#pyt
 
 In addition to this repository,
 you will be using our UCSC Pac-Man repository:
-[github.com/linqs/pacman](https://github.com/linqs/pacman).
+[github.com/edulinq/pacai](https://github.com/edulinq/pacai).
 This contains all the core code we need for our Pac-Man-related AI agents,
 as well as some stubs for you to use in your assignments.
 You will want to make a **PRIVATE** copy of this repository in your GitHub account.
@@ -32,7 +32,7 @@ The key setup steps are:
 2. Setup your Python [virtual environment](p0/README.md#virtual-environments).
 3. Install the requirements listed in this repository's [requirements.txt](requirements.txt) file.
 4. Install [Tk](p0/README.md#tk).
-5. Create a **private** copy of the [Pac-Man repo](https://github.com/linqs/pacman).
+5. Create a **private** copy of the [Pac-Man repo](https://github.com/edulinq/pacai).
 6. Clone your **private** Pac-Man repo.
 
 ## Assignments

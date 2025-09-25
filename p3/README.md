@@ -1,18 +1,20 @@
 # Project 3: Reinforcement Learning
 
 <p align="center">
-    <img alt="Pac-Man with Ghosts" src="images/pacman-learning.gif" width="400px">
+    <img alt="Pac-Man with Ghosts" src="images/pacman-classic-capsule-qlearning.webp" width="400px">
     </br>
     Pac-Man seeks reward.<br/>
     Should he eat or should he run?<br/>
-    When in doubt, q-learn.
+    When in doubt, Q-learn.
 </p>
 
 ## Introduction
 
-In this project, you will implement value iteration and q-learning.
+In this project, you will implement
+[value iteration](https://en.wikipedia.org/wiki/Markov_decision_process#Value_iteration)
+and [Q-learning](https://en.wikipedia.org/wiki/Q-learning).
 You will test your agents first on Gridworld (from class),
-then apply them to a simulated robot controller (Crawler) and Pac-Man.
+then apply them to Pac-Man.
 
 The code for this project consists of several Python files,
 some of which you will need to read and understand in order to complete the assignment, and some you can glance over.
@@ -20,16 +22,18 @@ some of which you will need to read and understand in order to complete the assi
 ### Submission
 
 You will fill in portions of
-[`pacai/student/valueIterationAgent.py`](https://github.com/linqs/pacman/blob/main/pacai/student/valueIterationAgent.py)
-and [`pacai/student/qlearningAgents.py`](https://github.com/linqs/pacman/blob/main/pacai/student/qlearningAgents.py)
+[`pacai/student/learning.py`](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/learning.py)
+and [`pacai/student/learning-questions.py`](https://github.com/edulinq/pacai/blob/v2.0.0/pacai/student/learning_questions.py)
 during this assignment.
 You should **only** submit these two files.
+Unless told otherwise, you may create whatever supporting functions, methods, and members you need,
+as long as they are in the submitted file(s).
 
 For instructions on submission,
 refer back to the [P0 README](../p0/README.md).
 for example, you may submit with the command:
 ```sh
-python3 -m autograder.run.submit pacai/student/valueIterationAgent.py pacai/student/qlearningAgents.py pacai/student/analysis.py
+python3 -m autograder.run.submit pacai/student/learning.py pacai/student/learning-questions.py
 ```
 
 ### Evaluation
@@ -66,9 +70,9 @@ One more piece of advice: if you don't know what a variable does or what kind of
 ### Code
 
 All the code for this (and later projects) is available in this repository:
-[https://github.com/linqs/pacman](https://github.com/linqs/pacman).
+[https://github.com/edulinq/pacai](https://github.com/edulinq/pacai).
 The only files you should edit are located in the
-[pacai.student](https://linqs.github.io/pacman/docs/latest/pacai/student/index.html) package.
+[pacai.student](https://github.com/edulinq/pacai/tree/v2.0.0/pacai/student) package.
 You should **not** use any third-party libraries,
 but the [Python Standard Library](https://docs.python.org/3/library/) is fair-game.
 If a bug is found in the code (non-student) code,
@@ -77,169 +81,259 @@ then the class will be alerted and you will have to pull the changes from this r
 Any commands provided throughout these instructions are to be executed from the project root directory
 (the one with the `README.md` and `LICENSE.md` files).
 
-- States
-  - [pacai.core.gamestate.AbstractGamestate](https://linqs.github.io/pacman/docs/latest/pacai//core/gamestate.html#pacai.core.gamestate.AbstractGameState)
-  - [pacai.bin.pacman.PacmanGameState](https://linqs.github.io/pacman/docs/latest/pacai/bin/pacman.html#pacai.bin.pacman.PacmanGameState)
-- Other Binaries
-  - [pacai.bin.crawler](https://linqs.github.io/pacman/docs/latest/pacai/bin/crawler.html)
-  - [pacai.bin.gridworld](https://linqs.github.io/pacman/docs/latest/pacai/bin/gridworld.html)
-- Utilities
-  - [pacai.util.probability.flipCoin](https://linqs.github.io/pacman/docs/latest/pacai/util/probability.html#pacai.util.probability.flipCoin)
+ - Core Engine Elements
+   - [pacai.core.action.Action](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/action.html#Action)
+   - [pacai.core.board.Board](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/board.html#Board)
+   - [pacai.core.board.Position](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/board.html#Position)
+   - [pacai.core.mdp.MarkovDecisionProcess](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/mdp.html#MarkovDecisionProcess)
+   - [pacai.gridworld.mdp.GridWorldMDP](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/gridworld/mdp.html#GridWorldMDP)
+ - Agents
+   - [pacai.core.agent Agent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/agent.html#Agent)
+   - [pacai.agents.mdp.MDPAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent)
 
-## MDPs
+## GridWorld & MDPs
 
-To get started, run Gridworld in manual control mode, which uses the arrow keys:
+GridWorld is a whole new and dangerous world for your agents to explore!
+In GridWorld, your agent (the red square) wants to make it to a goal.
+Goals are the terminal states (the ones with numbers) with a positive number.
+There are no opposing agents in this world, but there are still dangers.
+If your agent enters a negative terminal state, they will lose.
+Should be super easy, right?
+Unfortunately, actions taken within GridWorld are not guaranteed.
+Every time your agent moves in a directions, it may accidentally "slip" in the wrong direction.
+Let's see this in action:
 ```sh
-python3 -m pacai.bin.gridworld --manual
+python3 -m pacai.gridworld
 ```
 
-You will see the two-exit layout from class.
-The blue dot is the agent.
-Note that when you press _up_, the agent only actually moves north 80% of the time.
-Such is the life of a Gridworld agent!
+Here you can see the two-exit board (called `gridworld-book`) from class.
+Your agent starts in the lower left corner.
+Terminal states (the boxes with number in them) are the exits in this world.
+Reaching one will cause the game to end.
+Reaching a positive terminal state will "win" the game,
+and reaching a negative terminal state will "lose" the game.
 
-You can control many aspects of the simulation.
+You can use the normal Pac-Man controls (arrows or WASD) to control your agent.
+Notice that when you try to go in a direction, the agent will only obey about 80% of the time.
+You can really obviously see this if you tell you agent to constantly bonk into the wall.
+Eventually the agent will move to the side instead.
+You can think of this as the agent accidentally "slipping" in one of the other directions
+(maybe the floor in GridWorld is always slippery).
+An agent will never "slip" backwards.
+
+Under the hood, GridWorld is an environment that is controlled by a simple [Markov Decision Process (MDP)](https://en.wikipedia.org/wiki/Markov_decision_process).
+So, transitioning between states (moving between squares) has a probabilistic component to it.
+In this assignment, we will create agents that know about the underlying MDP (value iteration)
+and agents that try to model the underlying MDP without knowing about the details.
+
+You can control many aspects of GridWorld just like you do with Pac-Man.
 A full list of options is available by running:
 ```sh
-python3 -m pacai.bin.gridworld --help
+python3 -m pacai.gridworld --help
 ```
 
-The default agent moves randomly
+For example, if you want your agent to disobey 50% of the time, just increase the noise:
 ```sh
-python3 -m pacai.bin.gridworld --grid MazeGrid
+python3 -m pacai.gridworld --noise 0.5
 ```
 
-You should see the random agent bounce around the grid until it happens upon an exit.
-Not the finest hour for an AI agent.
+Many of the agents you are familiar with from Pac-Man still work here.
+There's no food or ghosts so several agents will get pretty confused,
+but simple agents should do fine.
+You can set the agent with `--agent`.
+For example, you can use the random agent with:
+```sh
+python3 -m pacai.gridworld --agent agent-random
+```
+
+Since this grid is small and the game may end fast,
+don't forget that you can set the FPS with `--fps`:
+```sh
+python3 -m pacai.gridworld --agent agent-random --fps 2
+```
+
+It's hard to see the agent misbehaving when you are not controlling it directly.
+You can use `--debug` to see more information:
+```sh
+python3 -m pacai.gridworld --agent agent-random --fps 2 --debug
+```
+
+There are several GridWorld boards already provided for you.
+We will only be using a few in this assignment,
+but feel free to try them out:
+ - `gridworld-book` -- The default one (not that scary).
+ - `gridworld-bridge` -- A super scary bridge of doom.
+ - `gridworld-cliff` -- A medium-scary cliff.
+ - `gridworld-cliff2` -- A cliff that is less scary then the other cliff, but still a little scary.
+ - `gridworld-discount` -- More "risky" than "scary".
+ - `gridworld-maze` -- Not scary at all, but maybe a little spooky.
+
+Just like with Pac-Man, choose your board with `--board`:
+```sh
+python3 -m pacai.gridworld --board gridworld-maze
+```
 
 _Note:_
-The Gridworld MDP is such that you first must enter a pre-terminal state (the double boxes shown in the GUI) and then take the special 'exit' action before the episode actually ends.
-In this case, the true terminal state is called `TERMINAL_STATE`, which is not shown in the GUI.
-If you run an episode manually, your total return may be less than you expected, due to the discount rate (`--discount` to change; 0.9 by default).
+Ending a game for GridWorld has some nuances to it.
+You end a game by stepping on a square that has number on it with the box around it.
+These are technically called "pre-terminal" states.
+Once you are on that, you agent is then forced to take the "EXIT" action and enter a "terminal" state,
+which then causes it to exit/end the game/round/episode.
+This behavior matches more closely with what you may see in your textbook,
+since there are theoretical reasons that it makes more sense than just exiting directly.
+If you run with `--debug`, you can see your agent enter the per-terminal state,
+get a reward, and then be forced to take the "EXIT" action.
 
-Look at the console output that accompanies the graphical output.
-You should see information about each transition the agent experiences.
-You can turn this off by using `--quiet` or augment it using `--debug`.
-You can also run in text-only mode using `--text-graphics`.
-
-As in Pac-Man, positions are represented by `(x, y)` Cartesian coordinates.
-Thus any arrays are indexed by `[x][y]` with `'north'` being the direction of increasing `y`, etc.
-By default, most transitions will receive a reward of zero, though you can change this with the living reward option (`--living-reward`).
+If your games ever appear to be "hanging" (especially if you have no UI or debug output),
+then your agent may just be getting stuck in a cycle where they move between the same set of positions.
+You can always turn on the UI or use `--debug` to see if this is happening.
+If your code is written correctly, we don't anticipate this happening.
+(But it could always happen with correct code and non-optimal variable settings.)
+You can use `--max-turns 1000` to ensure that games like this get stopped.
 
 ### Question 1 (6 points)
 
-Write a value iteration agent in
-[pacai.student.valueIterationAgent.ValueIterationAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent).
-Your value iteration agent is an offline planner, not a reinforcement agent.
-This means the relevant training option is the number of iterations of value iteration it should run (option `--iterations`) in its initial planning phase.
-A [ValueIterationAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent)
-takes an MDP on construction and runs value iteration for the specified number of iterations.
+For our first agent, we will implement a [value iteration](https://en.wikipedia.org/wiki/Markov_decision_process#Value_iteration) agent
+in [pacai.student.learning.ValueIterationAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ValueIterationAgent).
+This agent is not only aware that the environment/world is controlled by an MDP,
+but has the exact parameters of that MDP
+(available as [pacai.student.learning.ValueIterationAgent.mdp](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ValueIterationAgent.mdp)).
+Since this agent has a copy of the MDP that the game/environment is using,
+it can just simulate games using that same MDP to come up with a good policy to follow.
 
-Value iteration computes k-step estimates of the optimal values, $V_k$.
-In addition to running value iteration,
-implement the following methods for
-[ValueIterationAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent) using $V_k$.
+This agent is a subclass of [pacai.agents.mdp.MDPAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent),
+and both of these classes have provided most of the infrastructure you need already.
+A lot of the existing code is just to properly display values in the Q-Display.
+Make sure to carefully take a look at all the provided code.
+Note that if you see a method without a comment,
+that is because it is inheriting that comment from its parent (which will show up in documentation, but not the code).
+You will have to implement the following methods (but you may create whatever else in this file you need):
+ - [`do_value_iteration()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ValueIterationAgent.do_value_iteration) -- Perform value iteration.
+ - [`get_qvalue()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ValueIterationAgent.get_qvalue) -- Fetch a Q-value for an MDP state and action.
+ - [`get_policy_action()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ValueIterationAgent.get_policy_action) -- Fetch the policy action for an MDP state.
 
-- [getValue(state)](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent.getValue)
-  returns the value of a state.
-- [getPolicy(state)](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent.getPolicy)
-  returns the best action according to computed values.
-- [getQValue(state, action)](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent.getQValue)
-  returns the q-value of the (state, action) pair.
-
-These quantities are all displayed in the GUI:
-values are numbers in squares, q-values are numbers in square quarters, and policies are arrows out from each square.
-
-_Important:_
-Use the "batch" version of value iteration where each vector $V_k$ is computed from a fixed vector $V_{k-1}$ (like in lecture),
+Make sure to use the "batch" version of value iteration where each vector $V_k$ is computed from a fixed vector $V_{k-1}$ (like in lecture),
 not the "online" version where one single weight vector is updated in place.
 The difference is discussed in [Sutton & Barto](http://incompleteideas.net/book/RLbook2018.pdf#page=97) starting in 4th paragraph of section 4.1.
 
-_Note:_
-A policy synthesized from values of depth k (which reflect the next k rewards) will actually reflect the next k+1 rewards (i.e. you return $\pi_{k+1}$).
-Similarly, the q-values will also reflect one more reward than the values (i.e. you return $Q_{k+1}$).
-You may assume that 100 iterations is enough for convergence in the questions below.
+If you need randomness (e.g., to break a tie),
+you can use your agent's [RNG](https://docs.python.org/3/library/random.html#random.Random) accessible via `self.rng`.
+It will have already been seeded in a repeatable way by the game engine.
 
-The following command loads your
-[ValueIterationAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/valueIterationAgent.html#pacai.student.valueIterationAgent.ValueIterationAgent),
-which will compute a policy and execute it 10 times.
-Press a key to cycle through values, q-values, and the simulation.
-You should find that the value of the start state (`V(start)`) and the empirical resulting average reward are quite close.
-
+Once implemented, you can run your agent with:
 ```sh
-python3 -m pacai.bin.gridworld --agent value --iterations 100 --episodes 10
+python3 -m pacai.gridworld --agent agent-value-iteration
 ```
 
-_Hint:_
-On the default BookGrid, running value iteration for 5 iterations should give you the following output.
-
+To help you understand what your agent is thinking, you can use GridWorld's Q-Display:
 ```sh
-python3 -m pacai.bin.gridworld --agent value --iterations 5
+python3 -m pacai.gridworld --agent agent-value-iteration --qdisplay
 ```
 
-<p align="center">
-    <img alt="BookGrid Value After 5 Iterations" src="images/bookgrid-after-5-value.png" width="600px">
-</p>
+<center>
+    <img alt='Value Iteration with the Q-Display' src='images/qdisplay-value-iteration.png' />
+</center>
 
-Your value iteration agent will be graded on a new grid.
-We will check your values, q-values, and policies after fixed numbers of iterations and at convergence (e.g. after 100 iterations).
+This extended display is specifically made for GridWorld.
+It shows your standard board in the upper left.
+There are copies of the board to its right and bottom showing different sets of values.
+The board on the right shows the MDP state values for each position along with the policy action (as an arrow).
+The board on the bottom shows the Q-values for each MDP state and action (the top triangle for north, the right for east, etc).
+Positive values are shown in green, while negative values are shown in red.
+More vibrant colors indicate numbers with a larger magnitude.
+This display will be particularly useful as we start to train agents over multiple games.
+
+You can visualize how your agent is learning by using the Q-Display and using fewer value iterations:
+```sh
+# 1 Value Iteration
+python3 -m pacai.gridworld --agent agent-value-iteration --qdisplay --agent-arg 0::iterations=1
+
+# 3 Value Iterations
+python3 -m pacai.gridworld --agent agent-value-iteration --qdisplay --agent-arg 0::iterations=3
+
+# 5 Value Iterations
+python3 -m pacai.gridworld --agent agent-value-iteration --qdisplay --agent-arg 0::iterations=5
+```
+
+You agent should be able to win almost 100% of the time on `gridworld-book` (the default board) after only 50 value iterations.
+```sh
+python3 -m pacai.gridworld --agent agent-value-iteration --agent-arg 0::iterations=50 --ui null --num-games 100
+```
+
+Note that this value iteration agent would fall into the category of "offline planning", and not "reinforcement learning".
+At the start of the game, the agent looks at its copy of the MDP (its model of the world/universe/physics) and simulates the possible things that can happen.
+The agent is not getting active feedback from the world itself.
+
+To get full credit you should be able to win `gridworld-book` 95% of the time with 50 value iterations:
+```sh
+python3 -m pacai.gridworld --agent agent-value-iteration --agent-arg 0::iterations=50 --ui null --num-games 100
+```
 
 ### Question 2 (1 point)
 
-On `BridgeGrid` with the default discount of 0.9 and the default noise of 0.2, the optimal policy does not cross the bridge.
-Change only **ONE** of the discount and noise parameters so that the optimal policy causes the agent to attempt to cross the bridge.
-Put your answer in [pacai.student.analysis.question2](https://linqs.github.io/pacman/docs/latest/pacai/student/analysis.html#pacai.student.analysis.question2).
-Note: noise refers to how often an agent ends up in an unintended successor state when they perform an action.
-The default corresponds to:
+On `gridworld-bridge` with the default discount rate of 0.9 and the default noise of 0.2,
+the optimal policy does not cross the bridge.
+You agent will be too scared to cross:
 ```sh
-python3 -m pacai.bin.gridworld --agent value --iterations 100 --grid BridgeGrid --discount 0.9 --noise 0.2
+python3 -m pacai.gridworld --agent agent-value-iteration --board gridworld-bridge --qdisplay --noise 0.2 --agent-arg 0::discount_rate=0.9
 ```
+
+Change only **ONE** of the discount and noise parameters (and nothing else) so that the optimal policy causes your agent to attempt to cross the bridge.
+(They may not make it, but they at least need to try.)
+Put your answer in the [pacai.student.analysis.learning-questions.question_2](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_2) function.
 
 ### Question 3 (5 points)
 
-Consider the `DiscountGrid` layout, shown below.
-This grid has two terminal states with positive payoff (shown in green),
+Consider the `gridworld-discount` board, shown in the image below.
+This grid has two terminal states with a positive payoff,
 a close exit with payoff +1 and a distant exit with payoff +10.
-The bottom row of the grid consists of terminal states with negative payoff (shown in red).
-Each state in this "cliff" region has payoff -10.
-The starting state is the yellow square.
+The bottom row of the grid consists of terminal states with negative payoff.
+Each state in this lower "cliff" region has payoff -10.
+The agent is shows in the starting state.
 
 We distinguish between two types of paths:
 1. Paths that "risk the cliff" and travel near the bottom row of the grid.
    These paths are shorter but risk earning a large negative payoff.
-   These paths are represented by the red arrow in the figure below.
+   These paths are represented by the orange arrow in the figure below.
 2. Paths that "avoid the cliff" and travel along the top edge of the grid.
    These paths are longer but are less likely to incur huge negative payoffs.
    These paths are represented by the green arrow in the figure below:
 
-<p align="center">
-    <img alt="DiscountGrid" src="images/discountgrid.png" width="600px">
-</p>
+<center>
+    <img alt='gridworld-discount Board with Paths' src='images/gridworld-discount-paths.png' />
+</center>
 
-Give an assignment of parameter values for discount, noise,
-and living-reward which produce the following optimal policy types or state that the policy is impossible by returning the constant `NOT_POSSIBLE`.
-The default corresponds to:
+Give an assignment of parameter values for discount, noise, and living-reward
+which produce the following optimal policy types or state that the policy is impossible by returning a single `None`.
+Unlike Question 2, you may change any of these three values.
+The default options corresponds to:
 ```sh
-python3 -m pacai.bin.gridworld --agent value --iterations 100 --grid DiscountGrid --discount 0.9 --noise 0.2 --living-reward 0.0
+python3 -m pacai.gridworld --agent agent-value-iteration --board gridworld-discount --qdisplay --noise 0.2 --living-reward 0.0 --agent-arg 0::discount_rate=0.9
 ```
 
-1. Prefer the close exit (+1), risking the cliff (-10).
-2. Prefer the close exit (+1), but avoiding the cliff (-10).
-3. Prefer the distant exit (+10), risking the cliff (-10).
-4. Prefer the distant exit (+10), avoiding the cliff (-10).
-5. Avoid both exits (also avoiding the cliff).
+ - [question_3a](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_3a) -- Prefer the close exit (+1), risking the cliff (orange direction)).
+ - [question_3b](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_3b) -- Prefer the close exit (+1), but avoiding the cliff (green direction).
+ - [question_3c](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_3c) -- Prefer the distant exit (+10), risking the cliff (orange direction).
+ - [question_3d](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_3d) -- Prefer the distant exit (+10), avoiding the cliff (green direction).
+ - [question_3e](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_3e) -- Avoid both exits (also avoiding the cliff).
 
-Now code [analysis.question3a](https://linqs.github.io/pacman/docs/latest/pacai/student/analysis.html#pacai.student.analysis.question3a)
-through [analysis.question3e](https://linqs.github.io/pacman/docs/latest/pacai/student/analysis.html#pacai.student.analysis.question3e)
-by returning a 3-item tuple of discount, noise, living reward.
-If no answer is possible, return the constant `NOT_POSSIBLE`.
+To check your choices using the GUI,
+make sure you pay attention to the "Values & Policy" screen and not just what your agent does.
+Remember that your agent will not always move in the intended direction,
+but we are checking if your **policy** is correct.
+(So we are checking that your agent wants to do the right thing, even if they don't actually do the right thing.)
 
-_Note:_
-You can check your policies in the GUI.
-For example, using a correct answer to 3(a),
-the arrow in (0, 1) should point east,
-the arrow in (1, 1) should also point east,
-and the arrow in (2, 1) should point north.
+To test the last scenario (`question_3e`), you can use `--max-turns` with no UI to quickly simulate a bunch of turns:
+```sh
+python3 -m pacai.gridworld --agent agent-value-iteration --board gridworld-discount --noise 0.2 --living-reward 0.0 --agent-arg 0::discount_rate=0.9 --ui null --max-turns 10000
+```
+
+We will score you by running games with your provided numbers and looking at your actions and scores.
+For each question, there may be many possible solutions (if any).
+To help the grader, try to keep your discount and noise in [0.0, 1.0],
+and your living reward in [-10.0, 10.0].
+If you know your values work but the grader does not give you the score you expect,
+try to find another set of values.
 
 ## Q-learning
 
@@ -247,244 +341,279 @@ Note that your value iteration agent does not actually learn from experience.
 Rather, it ponders its MDP model to arrive at a complete policy before ever interacting with a real environment.
 When it does interact with the environment,
 it simply follows the precomputed policy (e.g. it becomes a reflex agent).
-This distinction may be subtle in a simulated environment like a Gridword,
+This distinction may be subtle in a simulated environment like a GridWorld,
 but it's very important in the real world, where the real MDP is not available.
+
+Next in this assignment, we will create agents that use [Q-learning](https://en.wikipedia.org/wiki/Q-learning)
+to learn from the environment as it progresses through the game.
+Note that pacai will probably be using different variables names than the ones used in your resources describing Q-learning:
+
+| Classical Q-Learning Terminology | General Name         | pacai Variable                                     |
+|----------------------------------|----------------------|----------------------------------------------------|
+| α / Alpha                        | Learning Rate        | [pacai.agents.mdp.MDPAgent.learning_rate](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent.learning_rate) |
+| γ / Gamma                        | Discount Rate/Factor | [pacai.agents.mdp.MDPAgent.discount_rate](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent.discount_rate) |
+| ε / Epsilon                      | Exploration Rate     | [pacai.agents.mdp.MDPAgent.exploration_rate](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent.exploration_rate) |
 
 ### Question 4 (5 points)
 
-You will now write a q-learning agent, which does very little on construction,
-but instead learns by trial and error from interactions with the environment through its
-[update(state, action, nextState, reward)](https://linqs.github.io/pacman/docs/latest/pacai/agents/learning/reinforcement.html#pacai.agents.learning.reinforcement.ReinforcementAgent.update) method.
-A stub of a q-learner is specified in
-[pacai.student.qlearningAgents.QLearningAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent)
-and you can select it with the command line option `--agent q`.
-For this question, you must implement the
-[update](https://linqs.github.io/pacman/docs/latest/pacai/agents/learning/reinforcement.html#pacai.student.qlearningAgents.QLearningAgent.update),
-[getQValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getQValue),
-[getValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getValue),
-and [getPolicy](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getPolicy)
-methods in [QLearningAgents](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent).
+You will now implement the core code for a Q-learning agent in [pacai.student.learning.QLearningAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent).
+This agent starts off knowing very little about its environment,
+but learns via its [pacai.student.learning.QLearningAgent.update_qvalue()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.get_qvalue) method.
 
-_Note:_
-For [getValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getValue)
-and [getPolicy](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getPolicy),
-you should break ties randomly for better behavior.
-The `random.choice()` function will help.
-In a particular state, actions that your agent _hasn't_ seen before still have a Q-value, specifically a Q-value of zero,
-and if all of the actions that your agent _has_ seen before have a negative Q-value, an unseen action may be optimal.
+Like your value iteration agent, this agent is also a subclass of [pacai.agents.mdp.MDPAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/agents/mdp.html#MDPAgent).
+Make sure you thoroughly read and understand the existing code before you start.
+You will have to implement the following methods (but you may create whatever else in this file you need):
+ - [`update_qvalue()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.update_qvalue) -- Take in information from the previous and current states to update the agent's view of the world.
+ - [`get_action()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.get_action) -- Decide on the next action for this agent.
+ - [`get_mdp_state_value()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.get_mdp_state_value) -- Fetch the value for the given MDP state.
+ - [`get_policy_action()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.get_policy_action) -- Fetch the policy action for an MDP state.
 
-_Important:_ Make sure that you only access Q values by calling
-[getQValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getQValue)
-in your [getValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getValue)
-and [getPolicy](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getPolicy) functions.
-This abstraction will be useful for question 9 when you override
-[getQValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getQValue)
-to use features of state-action pairs rather than state-action pairs directly.
+Your agent will learn over several different games (set via the `--num-training` flag).
+The first time your agent runs, it will have no prior information.
+However, each time after that your agent will be passed the Q-values from its previous game/epoch.
+(We will refer to each game run during training as a ["training epoch"](https://deepai.org/machine-learning-glossary-and-terms/epoch),
+which is a more general way to refer to training a model.)
+This information will be loaded via
+[`pack_training_info()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.pack_training_info)
+and [`unpack_training_info()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent.unpack_training_info),
+which are already implemented for you.
+So for each epoch, you will have a fresh agent that gets the Q-values from the previous epoch.
+Once training is over, you agent will always get the Q-values from your last training epoch.
+You can tell if you agent is currently training via the [pacai.core.agent.Agent.training](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/agent.html#Agent.training) variable.
+During learning/training, a Q-learning agent may explore,
+otherwise the Q-learning agent is supposed to strictly follow the policy.
 
-With the q-learning update in place, you can watch your q-learner learn under manual control, using the keyboard:
+To help you debug your code,
+we have provided the [pacai.student.learning.QLearningUserInputAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningUserInputAgent).
+This agent is a subclass of your Q-learning agent,
+but takes input from you instead of using it's policy.
+This way, you can see how different actions will affect your learned values.
 ```sh
-python3 -m pacai.bin.gridworld --agent q --episodes 5 --manual
+python3 -m pacai.gridworld --agent agent-qlearning-user --qdisplay --num-training 10 --num-games 0 --show-training-ui
 ```
 
-Recall that `--episodes` will control the number of episodes your agent gets to learn.
-Watch how the agent learns about the state it was just in, not the one it moves to, and "leaves learning in its wake".
+This will let you play 10 training games where you can see the Q-Display update between epochs.
+Note that by default the UI is not shown during training (since you may be training for hundreds of epochs).
+To see the UI during training, you need to use `--show-training-ui`.
 
-### Question 5 (2 points)
-
-Complete your q-learning agent by implementing epsilon-greedy action selection in
-[getAction](https://linqs.github.io/pacman/docs/latest/pacai/agents/base.html#pacai.student.qlearningAgents.QLearningAgent.getAction),
-meaning it chooses random actions epsilon of the time, and follows its current best q-values otherwise.
-
+You can also use the `--debug` flag to get more information about your agent:
 ```sh
-python3 -m pacai.bin.gridworld --agent q --episodes 100
+python3 -m pacai.gridworld --agent agent-qlearning --num-training 10 --num-games 0 --ui null --debug
 ```
 
-Your final q-values should resemble those of your value iteration agent, especially along well-traveled paths.
-However, your average returns will be lower than the q-values predict because of the random actions and the initial learning phase.
+With just 20 epochs of training, your agent should be winning on the default board almost 100% of the time:
+```sh
+python3 -m pacai.gridworld --agent agent-qlearning --num-training 20 --num-games 100 --ui null
+```
 
-You can choose an element from a list uniformly at random by calling the `random.choice` function.
-You can simulate a binary variable with probability `p` of success by using
-[pacai.util.probability.flipCoin](https://linqs.github.io/pacman/docs/latest/pacai/util/probability.html#pacai.util.probability.flipCoin),
-which returns `True` with probability `p` and `False` with probability `1 - p`.
+Try re-running this command several times.
+Notice that there may be a few times (maybe 1-2 out of 10) where you agent wins less than 90% of the games.
+This is just the nature of reinforcement learning, when you may just get unlucky at some point in training.
+In more robust training schemes, we have techniques to help detect and mitigate these scenarios.
+
+It's also very interesting to see you agent learn over each epoch.
+Watch as your agent develops its policy and becomes more confident:
+```sh
+python3 -m pacai.gridworld --agent agent-qlearning --qdisplay --num-training 20 --show-training-ui
+```
+
+To get credit for this part, your agent should be able to win at least 85% of the games with 20 training epochs:
+```sh
+python3 -m pacai.gridworld --agent agent-qlearning --num-training 20 --num-games 100 --ui null
+```
+
+### Question 5 (1 points)
+
+First, train a completely random Q-learning agent `gridworld-bridge` for 50 epochs
+with the default learning rate, full exploration, and no noise,
+and look at what kind of policy your agent develops:
+```sh
+python3 -m pacai.gridworld --agent agent-qlearning --board gridworld-bridge --qdisplay --num-training 50 --noise 0.0 --agent-arg 0::learning_rate=0.5 --agent-arg 0::exploration_rate=1.0
+```
+
+Now try again with no exploration:
+```sh
+python3 -m pacai.gridworld --agent agent-qlearning --board gridworld-bridge --qdisplay --num-training 50 --noise 0.0 --agent-arg 0::learning_rate=0.5 --agent-arg 0::exploration_rate=0.0
+```
+
+Is there a set of values for the learning and exploration rates that make it highly likely (greater than 99%)
+for your agent to develop a policy that crosses the bridge to reach the 10 point exit?
+Put your answer in the [pacai.student.analysis.learning-questions.question_6](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning_questions.html#question_5) function.
+If there is no such pair of values, return a single `None`.
+
+## State Abstraction
+
+Time to play some Pac-Man!
+
+Up until now we have been playing on GridWorld,
+which was specifically designed to be used for reinforcement learning.
+Now, we will be learning on a normal game of Pac-Man!
+Just like before, we will run a certain number of training games that we can learn during,
+and then we will play some real games to check our score.
+For Pac-Man, we will need to train for far longer than GridWorld, since the game and representation is much more complex.
+
+Be aware that Pac-Man does not have a Q-Display available.
 
 ### Question 6 (1 points)
 
-First, train a completely random q-learner with the default learning rate on the noiseless BridgeGrid for 50 episodes and observe whether it finds the optimal policy.
-
+Your Q-learning agent should be able to play Pac-Man without any modifications:
 ```sh
-python3 -m pacai.bin.gridworld --agent q --episodes 50 --noise 0 --grid BridgeGrid --epsilon 1
+python3 -m pacai.pacman --pacman agent-qlearning --board grid-small --num-training 300 --num-games 20
 ```
 
-Now try the same experiment with an epsilon of 0.
-Is there an epsilon and a learning rate for which it is highly likely (greater than 99%) that the optimal policy will be learned after 50 iterations?
-Code [analysis.question6](https://linqs.github.io/pacman/docs/latest/pacai/student/analysis.html#pacai.student.analysis.question3a)
-to return EITHER a 2-item tuple of `(epsilon, learning rate)` OR the constant `NOT_POSSIBLE` if there is none.
-Epsilon is controlled by `--epsilon`, learning rate by `--learning-rate`.
-
-### Question 7 (1 point)
-
-With no additional code, you should now be able to run a q-learning crawler robot:
-```sh
-python3 -m pacai.bin.crawler
-```
-
-If this doesn't work, you've probably written some code too specific to the
-[gridworld](https://linqs.github.io/pacman/docs/latest/pacai/bin/gridworld.html) problem and you should make it more general to all MDPs.
-You will receive full credit if the command above works without exceptions.
-
-This will invoke the crawling robot from class using your q-learner.
-Play around with the various learning parameters to see how they affect the agent's policies and actions.
-Note that the step delay is a parameter of the simulation, whereas the learning rate and epsilon are parameters of your learning algorithm,
-and the discount factor is a property of the environment.
-
-## Approximate Q-learning and State Abstraction
-
-### Question 8 (1 points)
-
-Time to play some Pac-Man!
-Pac-Man will play games in two phases: _training_ and _testing_.
-
-In the first phase, _training_, Pac-Man will begin to learn about the values of positions and actions.
-Because it takes a very long time to learn accurate q-values even for tiny grids,
-Pac-Man's training games run in quiet mode by default, with no GUI (or console) display.
-
-Once Pac-Man's training is complete, he will enter _testing_ mode.
-When testing, Pac-Man's `epsilon` and `alpha` will be set to 0.0,
-effectively stopping q-learning and disabling exploration, in order to allow Pac-Man to exploit his learned policy.
-Test games are shown in the GUI by default.
-Without any code changes you should be able to run q-learning Pac-Man for very tiny grids as follows:
-```sh
-python3 -m pacai.bin.pacman -p PacmanQAgent --num-training 2000 --num-games 2010 --layout smallGrid
-```
-
-Note that
-[pacai.student.qlearningAgent.PacmanQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.PacmanQAgent)
-is already defined for you in terms of the
-[QLearningAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent) you have already implemented.
-[PacmanQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.PacmanQAgent)
-is only different in that it has default learning parameters that are more effective for the Pac-Man problem (`epsilon = 0.05, alpha = 0.2, gamma = 0.8`).
-You will receive full credit for this question if the command above works without exceptions and your agent wins at least 80% of the last 10 runs.
-
-_Hint:_
-If your [QLearningAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent)
-works for [gridworld](https://linqs.github.io/pacman/docs/latest/pacai/bin/gridworld.html)
-and [crawlery](https://linqs.github.io/pacman/docs/latest/pacai/bin/crawler.html)
-but does not seem to be learning a good policy for Pac-Man on `smallGrid`,
-it may be because your [getAction](https://linqs.github.io/pacman/docs/latest/pacai/agents/base.html#pacai.student.qlearningAgents.QLearningAgent.getAction)
-and/or [getPolicy](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getPolicy)
-methods do not in some cases properly consider unseen actions.
-In particular, because unseen actions have by definition a Q-value of zero,
-if all of the actions that _have_ been seen have negative Q-values, an unseen action may be optimal.
-
-_Note:_
-If you want to experiment with learning parameters, you can use the option `--agent-args`,
-for example `--agent-args epsilon=0.1,alpha=0.3,gamma=0.7`.
-These values will then be accessible as
-[self.getAlpha()](https://linqs.github.io/pacman/docs/latest/pacai/agents/learning/reinforcement.html#pacai.agents.learning.reinforcement.ReinforcementAgent.getAlpha),
-[self.getEpsilon()](https://linqs.github.io/pacman/docs/latest/pacai/agents/learning/reinforcement.html#pacai.agents.learning.reinforcement.ReinforcementAgent.getEpsilon),
-and [self.getGamma()](https://linqs.github.io/pacman/docs/latest/pacai/agents/learning/reinforcement.html#pacai.agents.learning.reinforcement.ReinforcementAgent.getGamma)
-inside the agent.
-
-_Note:_
-While a total of 2010 games will be played, the first 2000 games will not be displayed because of the option `--num-training 2000`,
-which designates the first 2000 games for training (no output).
-Thus, you will only see Pac-Man play the last 10 of these games.
-The number of training games is also passed to your agent as the option `numTraining`.
-
-_Note:_ If you want to watch 10 training games to see what's going on, use the command:
-```sh
-python3 -m pacai.bin.pacman -p PacmanQAgent --num-games 10 --layout smallGrid --agent-args numTraining=10
-```
-
-During training, you will see output every 100 games with statistics about how Pac-Man is faring.
-Epsilon is positive during training, so Pac-Man will play poorly even after having learned a good policy:
-this is because he occasionally makes a random exploratory move into a ghost.
-As a benchmark, it should take about 1,000 games  before Pac-Man's rewards for a 100 episode segment becomes positive,
-reflecting that he's started winning more than losing.
-By the end of training, it should remain positive and be fairly high (between 100 and 350).
+_Side Note on MDP State Representation_:
+In GridWorld, the MDP state can be represented just with a position,
+i.e., we know everything we need to know about our MDP state just by knowing where we are.
+Pac-Man, however, is much more complex and needs to know about more things like the ghost positions, food/pellets, capsules, etc.
+Therefore, while GridWorld will use the very fast
+[pacai.core.mdp.MDPStatePosition](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/mdp.html#MDPStatePosition) class,
+Pac-Man must use the more complex (and slower)
+[pacai.core.mdp.MDPStateBoard](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/mdp.html#MDPStateBoard) class.
+These state classes are chosen automatically, and don't require any action from you.
+The speed difference should be fairly noticeable.
 
 Make sure you understand what is happening here: the MDP state is the _exact_ board configuration facing Pac-Man,
 with the now complex transitions describing an entire ply of change to that state.
 The intermediate game configurations in which Pac-Man has moved but the ghosts have not replied are _not_ MDP states,
 but are bundled in to the transitions.
+You agent only gets to see the state when it is its turn to move,
+it does not get a chance to see the state before or between ghost movements.
 
-Once Pac-Man is done training, he should win very reliably in test games (at least 90% of the time),
-since now he is exploiting his learned policy.
-
-However, you'll find that training the same agent on the seemingly simple `mediumGrid` may not work well.
-In our implementation, Pac-Man's average training rewards remain negative throughout training.
-At test time, he plays badly, probably losing all of his test games.
-Training will also take a long time, despite its ineffectiveness.
-
-Pac-Man fails to win on larger layouts because each board configuration is a separate state with separate q-values.
-He has no way to generalize that running into a ghost is bad for all positions.
-Obviously, this approach will not scale.
-
-### Question 9 (3 points)
-
-Implement an approximate q-learning agent that learns weights for features of states,
-where many states might share the same features.
-Write your implementation in [pacai.student.qlearningAgent.ApproximateQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.ApproximateQAgent),
-which is a subclass of [PacmanQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.PacmanQAgent).
-
-_Note:_
-Approximate q-learning assumes the existence of a feature function f(s,a) over state and action pairs,
-which yields a vector $f_1(s,a) ... f_i(s,a) ... f_n(s,a)$ of feature values.
-We provide feature functions for you in [pacai.core.featureExtractors](https://linqs.github.io/pacman/docs/latest/pacai/core/featureExtractors.html).
-Feature vectors are dictionary objects containing the non-zero pairs of features and values;
-all omitted features have value zero.
-
-The approximate q-function takes the following form:
-```math
-    Q(s,a) = \sum_i^n f_i(s,a)w_i
+Your agent should be winning fairly reliably (>= 85%) on `grid-small` with just 300 training epochs.
+However, you'll find that training the same agent on the seemingly simple `classic-small` may not work well:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning --board classic-small --num-training 300 --num-games 20
 ```
 
-where each weight $w_i$ is associated with a particular feature $f_i(s,a)$.
-In your code, you should implement the weight vector as a dictionary mapping features (which the feature extractors will return) to weight values.
-You will update your weight vectors similarly to how you updated q-values:
+You likely didn't win even a single game.
+Pac-Man fails to win on larger boards because each board configuration is a separate state with separate Q-values.
+Your agent has no way to generalize that running into a ghost is bad for all positions.
+Obviously, this approach will not scale.
+
+You will be graded based on your performance on `grid-small`.
+You should be able to win at least 75% of the games:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning --board grid-small --num-training 300 --num-games 20 --ui null
+```
+
+Note that if you coded your Q-Learning agent properly in previous parts,
+you may not have to do anything for this question.
+
+## Approximate Q-learning and State Abstraction
+
+As we saw in the last question,
+out Q-learning agent can work quite well when there are a limited number of possible MDP states.
+But when the state space is large (like games with bigger boards or several agents),
+our Q-learning agent falls flat.
+This is mainly because the MDP state space (the number of possible MDP states) is so large
+that we will likely not be able to see all of the possible states in training (unless we train for a ridiculous amount of time).
+
+This is where [features](https://en.wikipedia.org/wiki/Feature_(machine_learning)) can help us out.
+Instead of _exactly_ representing our MDP state using the current board,
+we can _approximately_ represent our MDP state using features.
+This is called ["Approximate Q-Learning"](https://en.wikipedia.org/wiki/Q-learning#Function_approximation).
+
+In approximate Q-learning we will have a "feature function", $ f $,
+which will take in a state $ s $ and action $ a $ pair,
+and output a vector of features:
+$ f(s, a) = f_1(s, a), f_2(s, a), ... f_n(s, a) $.
+pacai provides some infrastructure for features and feature functions in
+[pacai.core.features](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/features.html).
+In pacai, features are typically held in a [pacai.core.features.FeatureDict](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/features.html#FeatureDict),
+which is a dictionary instead of a vector.
+This is just for convenience and clarity,
+since it is usually easier to debug your features when you can see the key associated with each one.
+Missing features are assumed to be 0.
+You can see a trivial feature function in
+[pacai.core.features.score_feature_extractor()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/features.html#score_feature_extractor),
+and a more complex one (specifically made for Pac-Man) in
+[pacai.pacman.features.simple_feature_extractor()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/pacman/features.html#simple_feature_extractor).
+
+Once features are computed,
+approximate Q-learning computes a Q-value by taking the [dot product](https://en.wikipedia.org/wiki/Dot_product)
+of the features with a vector of learned weights:
 ```math
     \begin{align}
-        w_i &\leftarrow w_i + \alpha [correction] f_i(s,a) \\
-        correction &= (R(s,a) + \gamma V'(s)) - Q(s,a)
+        Q(s, a) &= f(s, a) \cdot w \\
+                &= \sum_i^n f_i(s, a) * w_i
     \end{align}
 ```
 
-Note that the term is the same as in normal Q-Learning.
-
-By default [ApproximateQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.ApproximateQAgent)
-uses the [pacai.core.featureExtractors.IdentityExtractor](https://linqs.github.io/pacman/docs/latest/pacai/core/featureExtractors.html#pacai.core.featureExtractors.IdentityExtractor).
-This assigns a single feature to every `(state, action)` pair.
-With this feature extractor, your approximate q-learning agent should work identically to
-[PacmanQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.PacmanQAgent).
-You can test this with the following command:
-```sh
-python3 -m pacai.bin.pacman -p ApproximateQAgent --num-training 2000 --num-games 2010 --layout smallGrid
+As your agent learns, it can updated its weights (which will also update the Q-values) with:
+```math
+    \begin{align}
+        w_i        &\leftarrow w_i + \alpha * [correction] * f_i(s,a) \\
+        correction &= (R(s, a) + \gamma * V'(s)) - Q(s, a)
+    \end{align}
 ```
 
-_Important:_
-[ApproximateQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.ApproximateQAgent)
-is a subclass of [QLearningAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent),
-and it therefore shares several methods like [getAction](https://linqs.github.io/pacman/docs/latest/pacai/agents/base.html#pacai.student.qlearningAgents.QLearningAgent.getAction).
-Make sure that your methods in [QLearningAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent)
-call [getQValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getQValue) instead of accessing q-values directly,
-so that when you override [getQValue](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.QLearningAgent.getQValue) in your approximate agent,
-the new approximate q-values are used to compute actions.
+Where
+$ R(s, a) is the reward for taking action $ a $ on state $ s $
+and $ V'(s) $ is the MDP state value of $ s $.
+Note that this should look a lot like normal Q-learning.
 
-Once you're confident that your approximate learner works correctly with the identity features,
-run your approximate q-learning agent with our custom feature extractor, which can learn to win with ease:
+### Question 7 (3 points)
+
+Implement your own approximate Q-learning agent in
+[pacai.student.learning.ApproximateQLearningAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ApproximateQLearningAgent).
+This agent is a subclass of your [pacai.student.learning.QLearningAgent](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#QLearningAgent),
+but should not use the `qvalues` member.
+Instead, you will learn values for `weights` during training,
+and use those (with features) to compute Q-values.
+You will have to implement the following methods (but you may create whatever else in this file you need):
+ - [`get_qvalue()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ApproximateQLearningAgent.get_qvalue) -- Fetch a Q-value for an MDP state and action.
+ - [`update_qvalue()`](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ApproximateQLearningAgent.update_qvalue) -- Take in information from the previous and current states to update the agent's view of the world.
+
+A feature function will be available to your agent in
+[pacai.student.learning.ApproximateQLearningAgent.feature_extractor_func](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/student/learning.html#ApproximateQLearningAgent.feature_extractor_func).
+This function defaults to [pacai.core.features.score_feature_extractor()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/features.html#score_feature_extractor).
+This function is general and will work for every type of game,
+but (as we saw with P2's reflect agent) will not work well with Pac-Man:
 ```sh
-python3 -m pacai.bin.pacman -p ApproximateQAgent --agent-args extractor=pacai.core.featureExtractors.SimpleExtractor --num-training 50 --num-games 60 --layout mediumGrid
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board grid-small --num-training 300 --num-games 20
 ```
 
-Even much larger layouts should be no problem for your
-[ApproximateQAgent](https://linqs.github.io/pacman/docs/latest/pacai/student/qlearningAgents.html#pacai.student.qlearningAgents.ApproximateQAgent).
-(_Warning_: this may take a few minutes to train.)
-
+Instead we can use [pacai.core.features.board_feature_extractor()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/core/features.html#board_feature_extractor),
+which creates a unique feature for each state/action pair and gives it a value of 1.0.
+This means that our agent is learning a weight for each unique state/action pair,
+which should be exactly the same as normal Q-learning:
 ```sh
-python3 -m pacai.bin.pacman -p ApproximateQAgent --agent-args extractor=pacai.core.featureExtractors.SimpleExtractor --num-training 50 --num-games 60 --layout mediumClassic
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board grid-small --num-training 300 --num-games 20 --agent-arg 0::feature_extractor_func=feature-extractor-board
 ```
 
-If you have no errors, your approximate q-learning agent should win almost every time with these simple features,
-even with only 50 training games.
+Of course we don't just want to match our old agent,
+we want to beat it!
+So, let's try a real feature extractor,
+[pacai.pacman.features.simple_feature_extractor()](https://edulinq.github.io/pacai/docs/v2.0.0/pacai/pacman/features.html#simple_feature_extractor),
+which was made for Pac-Man:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board grid-small --num-training 300 --num-games 20 --agent-arg 0::feature_extractor_func=feature-extractor-pacman-simple
+```
+
+It does fine, but it typically will not beat the normal Q-learning agent on `grid-small`.
+Remember, the normal Q-learning agent does well on small/simple boards.
+Let's try again on a board that the normal Q-learning agent could not win on:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board classic-small --num-training 50 --num-games 20 --agent-arg 0::feature_extractor_func=feature-extractor-pacman-simple
+```
+
+Nice!
+We can win pretty consistently (>= 80%) on a fairly complex board,
+and we even trained way less.
+Even larger boards should be no match for your agent:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board classic-medium --num-training 50 --num-games 20 --agent-arg 0::feature_extractor_func=feature-extractor-pacman-simple
+```
+
+If you get real lucky, you may be able to win with a very small number of training games:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board classic-medium --num-training 5 --num-games 20 --agent-arg 0::feature_extractor_func=feature-extractor-pacman-simple
+```
+
+You will be graded based on your performance on `classic-small`.
+You should be able to win at least 50% of the games with only 20 training games:
+```sh
+python3 -m pacai.pacman --pacman agent-qlearning-approx --board classic-small --num-training 20 --num-games 100 --ui null --agent-arg 0::feature_extractor_func=feature-extractor-pacman-simple
+```
 
 <i>Congratulations! You have a learning Pac-Man agent!</i>
