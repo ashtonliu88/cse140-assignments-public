@@ -28,9 +28,19 @@ def buyLotsOfFruit(orderList):
     Returns cost of order
     """
 
-    # *** Your Code Here ***
+    total = 0.0
+    
+    for f, w in orderList:
 
-    return None
+        if f not in FRUIT_PRICES:
+
+            print(f"ERROR, {f} not found")
+
+            return None
+
+        total += FRUIT_PRICES[f] * w
+
+    return total
 
 def main():
     orderList = [

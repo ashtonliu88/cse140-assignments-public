@@ -19,9 +19,20 @@ def shopSmart(orderList, fruitShops):
     fruitShops: List of FruitShops
     """
 
-    # *** Your Code Here ***
+    best = None
+    least = None
+    
+    for fruitshop in fruitShops:
 
-    return None
+        total = fruitshop.getPriceOfOrder(orderList)
+
+        if least is None or total < least:
+
+            least = total
+
+            best = fruitshop
+
+    return best
 
 def main():
     dir1 = {
